@@ -40,7 +40,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     addAndMakeVisible(&lfoShapeCombo);
     
     lfoRateSlider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
-    lfoRateSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 70, 18);
+    lfoRateSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
     lfoRateSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff9b59b6));
     lfoRateSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoRateSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
@@ -54,7 +54,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     addAndMakeVisible(&lfoSyncButton);
     
     lfoSwingSlider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
-    lfoSwingSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 70, 18);
+    lfoSwingSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
     lfoSwingSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff9b59b6));
     lfoSwingSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoSwingSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
@@ -74,6 +74,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoMixAmountSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff4a90e2));
     lfoMixAmountSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoMixAmountSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
+    // Make it easier to click by using a larger visual size
     addAndMakeVisible(&lfoMixAmountSlider);
     
     // Compression LFO
@@ -176,7 +177,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
         audioProcessor.getValueTreeState(), "lfoCharacterAmount", lfoCharacterAmountSlider);
     
     // Set window size (larger to accommodate LFO controls)
-    setSize (900, 600);
+    setSize (950, 650);
     
     // Set dark theme
     lookAndFeel.setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(0xff1a1a1a));
@@ -210,33 +211,33 @@ void FuzzPedalAudioProcessorEditor::paint (juce::Graphics& g)
     // LFO section label
     g.setColour(juce::Colour(0xff9b59b6));
     g.setFont(juce::Font(18.0f, juce::Font::bold));
-    g.drawText("LFO", 50, 80, 100, 25, juce::Justification::left);
+    g.drawText("LFO", 50, 100, 100, 25, juce::Justification::left);
 }
 
 void FuzzPedalAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
-    area.removeFromTop(110); // Space for title and LFO section
+    area.removeFromTop(80); // Space for title
     
-    // LFO controls section (top)
-    auto lfoArea = area.removeFromTop(120);
+    // LFO controls section (top) - give it more space
+    auto lfoArea = area.removeFromTop(140);
     int lfoStartX = 50;
-    int lfoY = 20;
+    int lfoY = 30; // More vertical space
     
-    // LFO Shape combo
-    lfoShapeCombo.setBounds(lfoStartX, lfoY, 120, 25);
-    lfoStartX += 140;
+    // LFO Shape combo - with label space
+    lfoShapeCombo.setBounds(lfoStartX, lfoY + 20, 130, 30);
+    lfoStartX += 150;
     
-    // LFO Rate
-    lfoRateSlider.setBounds(lfoStartX, lfoY - 10, 80, 80);
-    lfoStartX += 100;
+    // LFO Rate - larger and better spaced
+    lfoRateSlider.setBounds(lfoStartX, lfoY, 100, 100);
+    lfoStartX += 120;
     
-    // LFO Sync button
-    lfoSyncButton.setBounds(lfoStartX, lfoY + 10, 60, 30);
-    lfoStartX += 80;
+    // LFO Sync button - more space
+    lfoSyncButton.setBounds(lfoStartX, lfoY + 25, 70, 35);
+    lfoStartX += 90;
     
-    // LFO Swing
-    lfoSwingSlider.setBounds(lfoStartX, lfoY - 10, 80, 80);
+    // LFO Swing - larger and better spaced
+    lfoSwingSlider.setBounds(lfoStartX, lfoY, 100, 100);
     
     // Main parameter section
     const int knobSize = 150;
@@ -247,24 +248,26 @@ void FuzzPedalAudioProcessorEditor::resized()
     
     // Per-parameter LFO controls (small buttons and knobs above main knobs)
     const int lfoButtonSize = 50;
-    const int lfoKnobSize = 60;
-    const int lfoControlY = yPos - 80;
+    const int lfoKnobSize = 70; // Slightly larger for easier clicking
+    const int lfoControlY = yPos - 90; // More space above main knobs
     
     // Mix column
     int mixX = startX;
-    lfoMixEnableButton.setBounds(mixX + (knobSize - lfoButtonSize) / 2, lfoControlY, lfoButtonSize, 25);
-    lfoMixAmountSlider.setBounds(mixX + (knobSize - lfoKnobSize) / 2, lfoControlY + 30, lfoKnobSize, lfoKnobSize);
+    lfoMixEnableButton.setBounds(mixX + (knobSize - lfoButtonSize) / 2, lfoControlY, lfoButtonSize, 30);
+    // Make LFO amount slider larger for easier clicking
+    lfoMixAmountSlider.setBounds(mixX + (knobSize - lfoKnobSize) / 2, lfoControlY + 35, lfoKnobSize, lfoKnobSize);
+    // Make main knob larger for easier clicking
     mixSlider.setBounds(mixX, yPos, knobSize, knobSize);
     
     // Compression column
     int compX = startX + knobSize + spacing;
-    lfoCompressionEnableButton.setBounds(compX + (knobSize - lfoButtonSize) / 2, lfoControlY, lfoButtonSize, 25);
-    lfoCompressionAmountSlider.setBounds(compX + (knobSize - lfoKnobSize) / 2, lfoControlY + 30, lfoKnobSize, lfoKnobSize);
+    lfoCompressionEnableButton.setBounds(compX + (knobSize - lfoButtonSize) / 2, lfoControlY, lfoButtonSize, 30);
+    lfoCompressionAmountSlider.setBounds(compX + (knobSize - lfoKnobSize) / 2, lfoControlY + 35, lfoKnobSize, lfoKnobSize);
     compressionSlider.setBounds(compX, yPos, knobSize, knobSize);
     
     // Character column
     int charX = startX + (knobSize + spacing) * 2;
-    lfoCharacterEnableButton.setBounds(charX + (knobSize - lfoButtonSize) / 2, lfoControlY, lfoButtonSize, 25);
-    lfoCharacterAmountSlider.setBounds(charX + (knobSize - lfoKnobSize) / 2, lfoControlY + 30, lfoKnobSize, lfoKnobSize);
+    lfoCharacterEnableButton.setBounds(charX + (knobSize - lfoButtonSize) / 2, lfoControlY, lfoButtonSize, 30);
+    lfoCharacterAmountSlider.setBounds(charX + (knobSize - lfoKnobSize) / 2, lfoControlY + 35, lfoKnobSize, lfoKnobSize);
     fuzzCharacterSlider.setBounds(charX, yPos, knobSize, knobSize);
 }
