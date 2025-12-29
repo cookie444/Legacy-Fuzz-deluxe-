@@ -31,12 +31,68 @@ FuzzPedalAudioProcessor::FuzzPedalAudioProcessor()
                 FUZZ_CHARACTER_ID, "Fuzz Character",
                 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 50.0f,
                 juce::String(), juce::AudioProcessorParameter::genericParameter,
+                [](float value, int) { return juce::String(value, 1) + " %"; }),
+            
+            // LFO Parameters
+            std::make_unique<juce::AudioParameterChoice>(
+                LFO_SHAPE_ID, "LFO Shape",
+                juce::StringArray("Sine", "Triangle", "Square", "Sawtooth", "Ramp", "Random"), 0),
+            
+            std::make_unique<juce::AudioParameterFloat>(
+                LFO_RATE_ID, "LFO Rate",
+                juce::NormalisableRange<float>(0.1f, 20.0f, 0.01f), 1.0f,
+                juce::String(), juce::AudioProcessorParameter::genericParameter,
+                [](float value, int) { return juce::String(value, 2) + " Hz"; }),
+            
+            std::make_unique<juce::AudioParameterBool>(
+                LFO_SYNC_ID, "LFO Sync", false),
+            
+            std::make_unique<juce::AudioParameterFloat>(
+                LFO_SWING_ID, "LFO Swing",
+                juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+                juce::String(), juce::AudioProcessorParameter::genericParameter,
+                [](float value, int) { return juce::String(value, 1) + " %"; }),
+            
+            // Per-parameter LFO controls
+            std::make_unique<juce::AudioParameterBool>(
+                LFO_MIX_ENABLE_ID, "LFO Mix Enable", false),
+            std::make_unique<juce::AudioParameterFloat>(
+                LFO_MIX_AMOUNT_ID, "LFO Mix Amount",
+                juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+                juce::String(), juce::AudioProcessorParameter::genericParameter,
+                [](float value, int) { return juce::String(value, 1) + " %"; }),
+            
+            std::make_unique<juce::AudioParameterBool>(
+                LFO_COMPRESSION_ENABLE_ID, "LFO Compression Enable", false),
+            std::make_unique<juce::AudioParameterFloat>(
+                LFO_COMPRESSION_AMOUNT_ID, "LFO Compression Amount",
+                juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+                juce::String(), juce::AudioProcessorParameter::genericParameter,
+                [](float value, int) { return juce::String(value, 1) + " %"; }),
+            
+            std::make_unique<juce::AudioParameterBool>(
+                LFO_CHARACTER_ENABLE_ID, "LFO Character Enable", false),
+            std::make_unique<juce::AudioParameterFloat>(
+                LFO_CHARACTER_AMOUNT_ID, "LFO Character Amount",
+                juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+                juce::String(), juce::AudioProcessorParameter::genericParameter,
                 [](float value, int) { return juce::String(value, 1) + " %"; })
         })
 {
     mixParam = parameters.getRawParameterValue(MIX_ID);
     compressionParam = parameters.getRawParameterValue(COMPRESSION_ID);
     fuzzCharacterParam = parameters.getRawParameterValue(FUZZ_CHARACTER_ID);
+    
+    lfoShapeParam = parameters.getRawParameterValue(LFO_SHAPE_ID);
+    lfoRateParam = parameters.getRawParameterValue(LFO_RATE_ID);
+    lfoSyncParam = parameters.getRawParameterValue(LFO_SYNC_ID);
+    lfoSwingParam = parameters.getRawParameterValue(LFO_SWING_ID);
+    lfoMixEnableParam = parameters.getRawParameterValue(LFO_MIX_ENABLE_ID);
+    lfoMixAmountParam = parameters.getRawParameterValue(LFO_MIX_AMOUNT_ID);
+    lfoCompressionEnableParam = parameters.getRawParameterValue(LFO_COMPRESSION_ENABLE_ID);
+    lfoCompressionAmountParam = parameters.getRawParameterValue(LFO_COMPRESSION_AMOUNT_ID);
+    lfoCharacterEnableParam = parameters.getRawParameterValue(LFO_CHARACTER_ENABLE_ID);
+    lfoCharacterAmountParam = parameters.getRawParameterValue(LFO_CHARACTER_AMOUNT_ID);
 }
 
 FuzzPedalAudioProcessor::~FuzzPedalAudioProcessor()
@@ -112,8 +168,27 @@ void FuzzPedalAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
     
+    currentSampleRate = sampleRate;
     inputGain.prepare(spec);
     outputGain.prepare(spec);
+    
+    // Initialize LFO
+    lfoPhase = 0.0;
+    lfoIncrement = calculateLFOFrequency() / sampleRate;
+    
+    // Get host BPM if available
+    if (auto* playHead = getPlayHead())
+    {
+        juce::AudioPlayHead::CurrentPositionInfo info;
+        if (playHead->getCurrentPosition(info))
+        {
+            if (info.bpm > 0.0)
+            {
+                hostBPM = info.bpm;
+                hostBPMValid = true;
+            }
+        }
+    }
 }
 
 void FuzzPedalAudioProcessor::releaseResources()
@@ -152,10 +227,35 @@ void FuzzPedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // Get parameter values
-    float mix = mixParam->load() / 100.0f;
-    float compression = compressionParam->load() / 100.0f;
-    float fuzzCharacter = fuzzCharacterParam->load() / 100.0f;
+    // Update host BPM if available
+    if (auto* playHead = getPlayHead())
+    {
+        juce::AudioPlayHead::CurrentPositionInfo info;
+        if (playHead->getCurrentPosition(info))
+        {
+            if (info.bpm > 0.0)
+            {
+                hostBPM = info.bpm;
+                hostBPMValid = true;
+            }
+        }
+    }
+    
+    // Update LFO frequency
+    lfoIncrement = calculateLFOFrequency() / currentSampleRate;
+    
+    // Get base parameter values
+    float baseMix = mixParam->load() / 100.0f;
+    float baseCompression = compressionParam->load() / 100.0f;
+    float baseFuzzCharacter = fuzzCharacterParam->load() / 100.0f;
+    
+    // Get LFO parameters
+    bool lfoMixEnable = lfoMixEnableParam->load() > 0.5f;
+    float lfoMixAmount = lfoMixAmountParam->load() / 100.0f;
+    bool lfoCompressionEnable = lfoCompressionEnableParam->load() > 0.5f;
+    float lfoCompressionAmount = lfoCompressionAmountParam->load() / 100.0f;
+    bool lfoCharacterEnable = lfoCharacterEnableParam->load() > 0.5f;
+    float lfoCharacterAmount = lfoCharacterAmountParam->load() / 100.0f;
 
     // Process each channel
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -164,6 +264,32 @@ void FuzzPedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
 
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
+            // Get LFO value
+            float lfoValue = getLFOValue();
+            
+            // Apply LFO modulation to parameters
+            float mix = baseMix;
+            float compression = baseCompression;
+            float fuzzCharacter = baseFuzzCharacter;
+            
+            if (lfoMixEnable)
+            {
+                float modulation = lfoValue * lfoMixAmount;
+                mix = juce::jlimit(0.0f, 1.0f, baseMix + modulation);
+            }
+            
+            if (lfoCompressionEnable)
+            {
+                float modulation = lfoValue * lfoCompressionAmount;
+                compression = juce::jlimit(0.0f, 1.0f, baseCompression + modulation);
+            }
+            
+            if (lfoCharacterEnable)
+            {
+                float modulation = lfoValue * lfoCharacterAmount;
+                fuzzCharacter = juce::jlimit(0.0f, 1.0f, baseFuzzCharacter + modulation);
+            }
+            
             float input = channelData[sample];
             
             // Process fuzz
@@ -226,6 +352,108 @@ float FuzzPedalAudioProcessor::processFuzz(float input, float character, float c
     }
     
     return fuzzed * 0.5f; // Output gain reduction
+}
+
+//==============================================================================
+double FuzzPedalAudioProcessor::calculateLFOFrequency()
+{
+    bool sync = lfoSyncParam->load() > 0.5f;
+    float rate = lfoRateParam->load();
+    
+    if (sync && hostBPMValid)
+    {
+        // Sync to BPM - rate represents note divisions
+        // 1.0 = whole note, 2.0 = half note, 4.0 = quarter note, etc.
+        double noteLength = 60.0 / hostBPM; // seconds per whole note
+        double division = noteLength / rate;
+        return 1.0 / division;
+    }
+    else
+    {
+        // Free rate in Hz
+        return rate;
+    }
+}
+
+float FuzzPedalAudioProcessor::getLFOShapeValue(float phase, int shape)
+{
+    // Normalize phase to 0-1
+    float normalizedPhase = phase - std::floor(phase);
+    
+    switch (shape)
+    {
+        case 0: // Sine
+            return std::sin(normalizedPhase * juce::MathConstants<float>::twoPi) * 0.5f + 0.5f;
+        
+        case 1: // Triangle
+            if (normalizedPhase < 0.5f)
+                return normalizedPhase * 2.0f;
+            else
+                return 2.0f - normalizedPhase * 2.0f;
+        
+        case 2: // Square
+            return normalizedPhase < 0.5f ? 1.0f : 0.0f;
+        
+        case 3: // Sawtooth
+            return normalizedPhase;
+        
+        case 4: // Ramp (reverse sawtooth)
+            return 1.0f - normalizedPhase;
+        
+        case 5: // Random (sample and hold)
+            // Sample and hold - hold value until next cycle
+            return randomHoldValue;
+        
+        default:
+            return normalizedPhase;
+    }
+}
+
+float FuzzPedalAudioProcessor::getLFOValue()
+{
+    int shape = static_cast<int>(lfoShapeParam->load());
+    float swing = lfoSwingParam->load() / 100.0f;
+    
+    // Update phase
+    double oldPhase = lfoPhase;
+    lfoPhase += lfoIncrement;
+    
+    // Handle sample and hold for random shape
+    if (shape == 5)
+    {
+        // Generate new random value when phase wraps
+        if (lfoPhase >= 1.0 || (oldPhase < 0.5 && lfoPhase >= 0.5))
+        {
+            randomHoldValue = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        }
+    }
+    
+    if (lfoPhase >= 1.0)
+        lfoPhase -= 1.0;
+    
+    // Get base LFO value (0-1)
+    float baseValue = getLFOShapeValue(static_cast<float>(lfoPhase), shape);
+    
+    // Apply swing (stretches the first half, compresses the second half)
+    if (swing > 0.0f)
+    {
+        float swingAmount = swing * 0.5f; // Max 50% swing
+        if (baseValue < 0.5f)
+        {
+            // Stretch first half
+            baseValue = baseValue * (1.0f + swingAmount) / (1.0f + swingAmount * 0.5f);
+        }
+        else
+        {
+            // Compress second half
+            float secondHalf = (baseValue - 0.5f) * 2.0f;
+            secondHalf = secondHalf * (1.0f - swingAmount);
+            baseValue = 0.5f + secondHalf * 0.5f;
+        }
+    }
+    
+    // Convert to -1 to 1 range for modulation
+    return (baseValue - 0.5f) * 2.0f;
 }
 
 //==============================================================================

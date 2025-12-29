@@ -11,8 +11,8 @@ juce_add_plugin(FuzzPedal
     PLUGIN_MANUFACTURER_CODE YrCo
     PLUGIN_CODE FzPd
     FORMATS VST3 Standalone
-    PRODUCT_NAME "Legacy Fuzz"
-    DESCRIPTION "A fuzz pedal VST with mix, compression, and character controls"
+    PRODUCT_NAME "Legacy Fuzz (Deluxe)"
+    DESCRIPTION "A fuzz pedal VST with mix, compression, character controls, and BPM-syncable LFO"
     VERSION 1.0.0
 )
 
