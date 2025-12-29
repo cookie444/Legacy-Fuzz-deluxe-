@@ -26,11 +26,12 @@ JuceLibraryCode/
 *.a
 *.lib
 
-# VST plugin outputs
-*.vst3
+# VST plugin outputs (but allow release builds)
 *.vst
 *.component
 *.app
+# Allow VST3 in releases directory
+!Releases/**/*.vst3
 
 # CMake
 CMakeCache.txt
