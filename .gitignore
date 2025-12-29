@@ -1,0 +1,45 @@
+# Build directories
+build/
+Build/
+*.build/
+
+# JUCE generated files
+JuceLibraryCode/
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.user
+*.sdf
+*.opensdf
+*.db
+*.opendb
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# VST plugin outputs
+*.vst3
+*.vst
+*.component
+*.app
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
