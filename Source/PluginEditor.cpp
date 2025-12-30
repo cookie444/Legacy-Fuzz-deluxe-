@@ -279,14 +279,14 @@ void FuzzPedalAudioProcessorEditor::resized()
     const int totalWidth = (knobSize * 3) + (spacing * 2);
     const int startX = (getWidth() - totalWidth) / 2;
     
-    // Position main knobs in center of bottom section
-    const int mainKnobY = bottomSection.getCentreY() - knobSize / 2;
+    // Position main knobs lower in bottom section to utilize larger space
+    const int mainKnobY = bottomSection.getBottom() - knobSize - 40; // Position lower
     
     // Per-parameter LFO controls (mini knobs ABOVE main knobs)
     const int lfoButtonSize = 50;
     const int lfoKnobSize = 70;
-    const int lfoButtonY = mainKnobY - 50; // Button above main knob
-    const int lfoAmountY = mainKnobY - 90; // Mini knob above button
+    const int lfoButtonY = mainKnobY - 60; // More space between button and main knob
+    const int lfoAmountY = mainKnobY - 140; // More space between amount knob and button
     
     // Mix column
     int mixX = startX;
