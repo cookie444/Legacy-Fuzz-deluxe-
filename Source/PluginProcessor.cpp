@@ -57,23 +57,23 @@ FuzzPedalAudioProcessor::FuzzPedalAudioProcessor()
             std::make_unique<juce::AudioParameterBool>(
                 LFO_MIX_ENABLE_ID, "LFO Mix Enable", false),
             std::make_unique<juce::AudioParameterFloat>(
-                LFO_MIX_AMOUNT_ID, "LFO Mix Amount",
+                LFO_MIX_AMOUNT_ID, "",  // Empty name to prevent label display
                 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
                 juce::String(), juce::AudioProcessorParameter::genericParameter,
                 [](float value, int) { return juce::String(value, 1) + " %"; }),
             
             std::make_unique<juce::AudioParameterBool>(
-                LFO_COMPRESSION_ENABLE_ID, "LFO Compression Enable", false),
+                LFO_COMPRESSION_ENABLE_ID, "Compression Enable", false),
             std::make_unique<juce::AudioParameterFloat>(
-                LFO_COMPRESSION_AMOUNT_ID, "LFO Compression Amount",
+                LFO_COMPRESSION_AMOUNT_ID, "",  // Empty name to prevent label display
                 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
                 juce::String(), juce::AudioProcessorParameter::genericParameter,
                 [](float value, int) { return juce::String(value, 1) + " %"; }),
             
             std::make_unique<juce::AudioParameterBool>(
-                LFO_CHARACTER_ENABLE_ID, "LFO Character Enable", false),
+                LFO_CHARACTER_ENABLE_ID, "Character Enable", false),
             std::make_unique<juce::AudioParameterFloat>(
-                LFO_CHARACTER_AMOUNT_ID, "LFO Character Amount",
+                LFO_CHARACTER_AMOUNT_ID, "",  // Empty name to prevent label display
                 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
                 juce::String(), juce::AudioProcessorParameter::genericParameter,
                 [](float value, int) { return juce::String(value, 1) + " %"; })
