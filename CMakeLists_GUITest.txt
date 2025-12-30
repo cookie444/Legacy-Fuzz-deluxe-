@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.22)
+
+project(GUITest VERSION 1.0.0)
+
+# Add JUCE
+add_subdirectory(../JUCE JUCE)
+
+# Create a simple GUI application
+juce_add_gui_app(GUITest
+    COMPANY_NAME "YourCompany"
+    PRODUCT_NAME "Legacy Fuzz GUI Test"
+    VERSION 1.0.0
+)
+
+# Add source files
+target_sources(GUITest PRIVATE
+    Source/GUITestApp.cpp
+    Source/PluginProcessor.cpp
+    Source/PluginProcessor.h
+    Source/PluginEditor.cpp
+    Source/PluginEditor.h
+)
+
+# Link JUCE libraries
+target_link_libraries(GUITest
+    PRIVATE
+    juce::juce_audio_utils
+    juce::juce_audio_processors
+    juce::juce_audio_plugin_client
+    juce::juce_dsp
+    PUBLIC
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags
+)
+

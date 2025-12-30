@@ -220,21 +220,21 @@ void FuzzPedalAudioProcessorEditor::resized()
     area.removeFromTop(80); // Space for title
     
     // LFO controls section (middle) - between title and main knobs
-    auto lfoArea = area.removeFromTop(140);
+    auto lfoArea = area.removeFromTop(160);
     int lfoStartX = 50;
-    int lfoY = 20; // Vertical position within LFO area
+    int lfoY = 30; // Vertical position within LFO area
     
-    // LFO Shape combo - with label space
-    lfoShapeCombo.setBounds(lfoStartX, lfoY + 20, 130, 30);
-    lfoStartX += 150;
+    // LFO Shape combo - with label space, give it more room
+    lfoShapeCombo.setBounds(lfoStartX, lfoY + 20, 140, 30);
+    lfoStartX += 160; // More space after combo
     
     // LFO Rate - larger and better spaced
     lfoRateSlider.setBounds(lfoStartX, lfoY, 100, 100);
-    lfoStartX += 120;
+    lfoStartX += 130; // More space after rate
     
-    // LFO Sync button - more space
-    lfoSyncButton.setBounds(lfoStartX, lfoY + 25, 70, 35);
-    lfoStartX += 90;
+    // LFO Sync button - more space, centered vertically
+    lfoSyncButton.setBounds(lfoStartX, lfoY + 30, 80, 40);
+    lfoStartX += 100; // More space after sync
     
     // LFO Swing - larger and better spaced
     lfoSwingSlider.setBounds(lfoStartX, lfoY, 100, 100);

@@ -83,3 +83,5 @@ Copy the `.vst3` file to your VST3 plugin directory:
 
 This project is provided as-is for educational and personal use.
 
+
+
