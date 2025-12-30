@@ -75,6 +75,8 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoMixAmountSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoMixAmountSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
     lfoMixAmountSlider.setName(""); // Ensure no name/label
+    lfoMixAmountSlider.setPopupDisplayEnabled(false, false, nullptr); // Disable popup display
+    lfoMixAmountSlider.setTooltip(""); // Remove tooltip
     addAndMakeVisible(&lfoMixAmountSlider);
     
     // Compression LFO
@@ -91,6 +93,8 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoCompressionAmountSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoCompressionAmountSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
     lfoCompressionAmountSlider.setName(""); // Ensure no name/label
+    lfoCompressionAmountSlider.setPopupDisplayEnabled(false, false, nullptr); // Disable popup display
+    lfoCompressionAmountSlider.setTooltip(""); // Remove tooltip
     addAndMakeVisible(&lfoCompressionAmountSlider);
     
     // Character LFO
@@ -107,6 +111,8 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoCharacterAmountSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoCharacterAmountSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
     lfoCharacterAmountSlider.setName(""); // Ensure no name/label
+    lfoCharacterAmountSlider.setPopupDisplayEnabled(false, false, nullptr); // Disable popup display
+    lfoCharacterAmountSlider.setTooltip(""); // Remove tooltip
     addAndMakeVisible(&lfoCharacterAmountSlider);
     
     // Set up labels
