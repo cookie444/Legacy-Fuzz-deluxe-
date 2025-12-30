@@ -285,8 +285,10 @@ void FuzzPedalAudioProcessorEditor::resized()
     // Per-parameter LFO controls (mini knobs ABOVE main knobs)
     const int lfoButtonSize = 50;
     const int lfoKnobSize = 70;
-    const int lfoButtonY = mainKnobY - 60; // More space between button and main knob
-    const int lfoAmountY = mainKnobY - 140; // More space between amount knob and button
+    const int lfoButtonY = mainKnobY - 60; // Space between button and main knob
+    // Amount knob: position it much higher with significant gap from button
+    // Button ends at lfoButtonY + 30, so amount knob should be at least 80px above that
+    const int lfoAmountY = lfoButtonY - 80 - lfoKnobSize; // 80px gap between button and amount knob
     
     // Mix column
     int mixX = startX;
