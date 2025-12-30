@@ -177,7 +177,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
         audioProcessor.getValueTreeState(), "lfoCharacterAmount", lfoCharacterAmountSlider);
     
     // Set window size (larger to accommodate LFO controls and amount knobs below)
-    setSize (950, 700);
+    setSize (1100, 700);
     
     // Set dark theme
     lookAndFeel.setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(0xff1a1a1a));
@@ -220,21 +220,21 @@ void FuzzPedalAudioProcessorEditor::resized()
     area.removeFromTop(80); // Space for title
     
     // LFO controls section (middle) - between title and main knobs
-    auto lfoArea = area.removeFromTop(160);
+    auto lfoArea = area.removeFromTop(180);
     int lfoStartX = 50;
-    int lfoY = 30; // Vertical position within LFO area
+    int lfoY = 40; // Vertical position within LFO area
     
     // LFO Shape combo - with label space, give it more room
     lfoShapeCombo.setBounds(lfoStartX, lfoY + 20, 140, 30);
-    lfoStartX += 160; // More space after combo
+    lfoStartX += 180; // Much more space after combo
     
     // LFO Rate - larger and better spaced
     lfoRateSlider.setBounds(lfoStartX, lfoY, 100, 100);
-    lfoStartX += 130; // More space after rate
+    lfoStartX += 150; // Much more space after rate
     
     // LFO Sync button - more space, centered vertically
     lfoSyncButton.setBounds(lfoStartX, lfoY + 30, 80, 40);
-    lfoStartX += 100; // More space after sync
+    lfoStartX += 130; // Much more space after sync
     
     // LFO Swing - larger and better spaced
     lfoSwingSlider.setBounds(lfoStartX, lfoY, 100, 100);
