@@ -176,8 +176,8 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoCharacterAmountAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         audioProcessor.getValueTreeState(), "lfoCharacterAmount", lfoCharacterAmountSlider);
     
-    // Set window size (larger to accommodate LFO controls and amount knobs below)
-    setSize (1100, 700);
+    // Set window size (three equal sections)
+    setSize (1000, 750);
     
     // Set dark theme
     lookAndFeel.setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(0xff1a1a1a));
@@ -199,79 +199,96 @@ void FuzzPedalAudioProcessorEditor::paint (juce::Graphics& g)
     g.setGradientFill(gradient);
     g.fillAll();
     
-    // Title
+    // Draw section dividers
+    float sectionHeight = getHeight() / 3.0f;
+    g.setColour(juce::Colour(0xff4a90e2).withAlpha(0.3f));
+    g.drawLine(0.0f, sectionHeight, (float)getWidth(), sectionHeight, 1.0f);
+    g.drawLine(0.0f, sectionHeight * 2.0f, (float)getWidth(), sectionHeight * 2.0f, 1.0f);
+    
+    // Top section: Title (drawn in resized/paint, but we'll handle it in resized)
+    auto topSection = getLocalBounds().removeFromTop((int)sectionHeight);
     g.setColour(juce::Colour(0xffecf0f1));
     g.setFont(juce::Font(32.0f, juce::Font::bold));
-    g.drawText("LEGACY FUZZ (DELUXE)", getLocalBounds().removeFromTop(60), juce::Justification::centred);
+    g.drawText("LEGACY FUZZ (DELUXE)", topSection, juce::Justification::centred);
     
-    // Decorative line
-    g.setColour(juce::Colour(0xff4a90e2));
-    g.drawLine(50.0f, 60.0f, (float)getWidth() - 50.0f, 60.0f, 2.0f);
-    
-    // LFO section label (positioned in the LFO area, which starts after title)
+    // Middle section: LFO label
+    auto middleSection = juce::Rectangle<int>(0, (int)sectionHeight, getWidth(), (int)sectionHeight);
     g.setColour(juce::Colour(0xff9b59b6));
     g.setFont(juce::Font(18.0f, juce::Font::bold));
-    g.drawText("LFO", 50, 100, 100, 25, juce::Justification::left);
+    g.drawText("LFO", middleSection.removeFromLeft(100), juce::Justification::centred);
 }
 
 void FuzzPedalAudioProcessorEditor::resized()
 {
-    auto area = getLocalBounds();
-    area.removeFromTop(80); // Space for title
+    auto totalArea = getLocalBounds();
     
-    // LFO controls section (middle) - between title and main knobs
-    auto lfoArea = area.removeFromTop(180);
-    int lfoStartX = 50;
-    int lfoY = 40; // Vertical position within LFO area
+    // Divide into three equal horizontal sections
+    const int sectionHeight = getHeight() / 3;
     
-    // LFO Shape combo - with label space, give it more room
+    // ===== TOP SECTION: Title and BPM Sync Button =====
+    auto topSection = totalArea.removeFromTop(sectionHeight);
+    
+    // Title - centered
+    // (Title is drawn in paint, but we position the sync button here)
+    
+    // BPM Sync button - positioned in top right
+    int syncButtonWidth = 100;
+    int syncButtonHeight = 35;
+    lfoSyncButton.setBounds(
+        topSection.getRight() - syncButtonWidth - 20,
+        topSection.getCentreY() - syncButtonHeight / 2,
+        syncButtonWidth,
+        syncButtonHeight
+    );
+    
+    // ===== MIDDLE SECTION: LFO Controls =====
+    auto middleSection = totalArea.removeFromTop(sectionHeight);
+    int lfoStartX = 120; // Start after "LFO" label
+    int lfoY = middleSection.getCentreY() - 50; // Center vertically
+    
+    // LFO Shape combo
     lfoShapeCombo.setBounds(lfoStartX, lfoY + 20, 140, 30);
-    lfoStartX += 180; // Much more space after combo
+    lfoStartX += 180;
     
-    // LFO Rate - larger and better spaced
+    // LFO Rate
     lfoRateSlider.setBounds(lfoStartX, lfoY, 100, 100);
-    lfoStartX += 150; // Much more space after rate
+    lfoStartX += 150;
     
-    // LFO Sync button - more space, centered vertically
-    lfoSyncButton.setBounds(lfoStartX, lfoY + 30, 80, 40);
-    lfoStartX += 130; // Much more space after sync
-    
-    // LFO Swing - larger and better spaced
+    // LFO Swing
     lfoSwingSlider.setBounds(lfoStartX, lfoY, 100, 100);
     
-    // Main parameter section (bottom)
+    // ===== BOTTOM SECTION: Main Knobs and Mini Knobs Above =====
+    auto bottomSection = totalArea; // Remaining area
+    
     const int knobSize = 150;
     const int spacing = 40;
     const int totalWidth = (knobSize * 3) + (spacing * 2);
     const int startX = (getWidth() - totalWidth) / 2;
     
-    // Position main knobs in the remaining area
-    const int mainKnobY = area.getHeight() / 2 - knobSize / 2 - 50; // Offset up to make room for LFO amount knobs below
+    // Position main knobs in center of bottom section
+    const int mainKnobY = bottomSection.getCentreY() - knobSize / 2;
     
-    // Per-parameter LFO controls (buttons above main knobs, amount knobs BELOW main knobs)
+    // Per-parameter LFO controls (mini knobs ABOVE main knobs)
     const int lfoButtonSize = 50;
-    const int lfoKnobSize = 70; // Slightly larger for easier clicking
-    const int lfoButtonY = mainKnobY - 40; // Button above main knob
-    const int lfoAmountY = mainKnobY + knobSize + 20; // Amount knob BELOW main knob
+    const int lfoKnobSize = 70;
+    const int lfoButtonY = mainKnobY - 50; // Button above main knob
+    const int lfoAmountY = mainKnobY - 90; // Mini knob above button
     
     // Mix column
     int mixX = startX;
     lfoMixEnableButton.setBounds(mixX + (knobSize - lfoButtonSize) / 2, lfoButtonY, lfoButtonSize, 30);
-    mixSlider.setBounds(mixX, mainKnobY, knobSize, knobSize);
-    // LFO amount knob BELOW main knob
     lfoMixAmountSlider.setBounds(mixX + (knobSize - lfoKnobSize) / 2, lfoAmountY, lfoKnobSize, lfoKnobSize);
+    mixSlider.setBounds(mixX, mainKnobY, knobSize, knobSize);
     
     // Compression column
     int compX = startX + knobSize + spacing;
     lfoCompressionEnableButton.setBounds(compX + (knobSize - lfoButtonSize) / 2, lfoButtonY, lfoButtonSize, 30);
-    compressionSlider.setBounds(compX, mainKnobY, knobSize, knobSize);
-    // LFO amount knob BELOW main knob
     lfoCompressionAmountSlider.setBounds(compX + (knobSize - lfoKnobSize) / 2, lfoAmountY, lfoKnobSize, lfoKnobSize);
+    compressionSlider.setBounds(compX, mainKnobY, knobSize, knobSize);
     
     // Character column
     int charX = startX + (knobSize + spacing) * 2;
     lfoCharacterEnableButton.setBounds(charX + (knobSize - lfoButtonSize) / 2, lfoButtonY, lfoButtonSize, 30);
-    fuzzCharacterSlider.setBounds(charX, mainKnobY, knobSize, knobSize);
-    // LFO amount knob BELOW main knob
     lfoCharacterAmountSlider.setBounds(charX + (knobSize - lfoKnobSize) / 2, lfoAmountY, lfoKnobSize, lfoKnobSize);
+    fuzzCharacterSlider.setBounds(charX, mainKnobY, knobSize, knobSize);
 }
