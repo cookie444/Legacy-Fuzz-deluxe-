@@ -199,20 +199,23 @@ void FuzzPedalAudioProcessorEditor::paint (juce::Graphics& g)
     g.setGradientFill(gradient);
     g.fillAll();
     
-    // Draw section dividers
-    float sectionHeight = getHeight() / 3.0f;
-    g.setColour(juce::Colour(0xff4a90e2).withAlpha(0.3f));
-    g.drawLine(0.0f, sectionHeight, (float)getWidth(), sectionHeight, 1.0f);
-    g.drawLine(0.0f, sectionHeight * 2.0f, (float)getWidth(), sectionHeight * 2.0f, 1.0f);
+    // Draw section dividers - top section is smaller
+    float topSectionHeight = getHeight() / 6.0f; // Top section is 1/6 of height
+    float remainingHeight = getHeight() - topSectionHeight;
+    float middleSectionHeight = remainingHeight / 2.0f; // Middle and bottom split remaining space
     
-    // Top section: Title (drawn in resized/paint, but we'll handle it in resized)
-    auto topSection = getLocalBounds().removeFromTop((int)sectionHeight);
+    g.setColour(juce::Colour(0xff4a90e2).withAlpha(0.3f));
+    g.drawLine(0.0f, topSectionHeight, (float)getWidth(), topSectionHeight, 1.0f);
+    g.drawLine(0.0f, topSectionHeight + middleSectionHeight, (float)getWidth(), topSectionHeight + middleSectionHeight, 1.0f);
+    
+    // Top section: Title
+    auto topSection = getLocalBounds().removeFromTop((int)topSectionHeight);
     g.setColour(juce::Colour(0xffecf0f1));
-    g.setFont(juce::Font(32.0f, juce::Font::bold));
+    g.setFont(juce::Font(28.0f, juce::Font::bold));
     g.drawText("LEGACY FUZZ (DELUXE)", topSection, juce::Justification::centred);
     
     // Middle section: LFO label
-    auto middleSection = juce::Rectangle<int>(0, (int)sectionHeight, getWidth(), (int)sectionHeight);
+    auto middleSection = juce::Rectangle<int>(0, (int)topSectionHeight, getWidth(), (int)middleSectionHeight);
     g.setColour(juce::Colour(0xff9b59b6));
     g.setFont(juce::Font(18.0f, juce::Font::bold));
     g.drawText("LFO", middleSection.removeFromLeft(100), juce::Justification::centred);
@@ -222,14 +225,14 @@ void FuzzPedalAudioProcessorEditor::resized()
 {
     auto totalArea = getLocalBounds();
     
-    // Divide into three equal horizontal sections
-    const int sectionHeight = getHeight() / 3;
+    // Top section is smaller (1/6 of height), middle and bottom split remaining space
+    const int topSectionHeight = getHeight() / 6;
+    const int remainingHeight = getHeight() - topSectionHeight;
+    const int middleSectionHeight = remainingHeight / 2;
+    const int bottomSectionHeight = remainingHeight - middleSectionHeight;
     
     // ===== TOP SECTION: Title and BPM Sync Button =====
-    auto topSection = totalArea.removeFromTop(sectionHeight);
-    
-    // Title - centered
-    // (Title is drawn in paint, but we position the sync button here)
+    auto topSection = totalArea.removeFromTop(topSectionHeight);
     
     // BPM Sync button - positioned in top right
     int syncButtonWidth = 100;
@@ -242,7 +245,7 @@ void FuzzPedalAudioProcessorEditor::resized()
     );
     
     // ===== MIDDLE SECTION: LFO Controls =====
-    auto middleSection = totalArea.removeFromTop(sectionHeight);
+    auto middleSection = totalArea.removeFromTop(middleSectionHeight);
     int lfoStartX = 120; // Start after "LFO" label
     int lfoY = middleSection.getCentreY() - 50; // Center vertically
     
@@ -258,7 +261,7 @@ void FuzzPedalAudioProcessorEditor::resized()
     lfoSwingSlider.setBounds(lfoStartX, lfoY, 100, 100);
     
     // ===== BOTTOM SECTION: Main Knobs and Mini Knobs Above =====
-    auto bottomSection = totalArea; // Remaining area
+    auto bottomSection = totalArea; // Remaining area (should be bottomSectionHeight)
     
     const int knobSize = 150;
     const int spacing = 40;
