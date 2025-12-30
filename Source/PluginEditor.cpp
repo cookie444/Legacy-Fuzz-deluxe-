@@ -74,7 +74,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoMixAmountSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff4a90e2));
     lfoMixAmountSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoMixAmountSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
-    // Make it easier to click by using a larger visual size
+    lfoMixAmountSlider.setName(""); // Ensure no name/label
     addAndMakeVisible(&lfoMixAmountSlider);
     
     // Compression LFO
@@ -90,6 +90,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoCompressionAmountSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xffe74c3c));
     lfoCompressionAmountSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoCompressionAmountSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
+    lfoCompressionAmountSlider.setName(""); // Ensure no name/label
     addAndMakeVisible(&lfoCompressionAmountSlider);
     
     // Character LFO
@@ -105,6 +106,7 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     lfoCharacterAmountSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xfff39c12));
     lfoCharacterAmountSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
     lfoCharacterAmountSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
+    lfoCharacterAmountSlider.setName(""); // Ensure no name/label
     addAndMakeVisible(&lfoCharacterAmountSlider);
     
     // Set up labels
@@ -199,10 +201,12 @@ void FuzzPedalAudioProcessorEditor::paint (juce::Graphics& g)
     g.setGradientFill(gradient);
     g.fillAll();
     
-    // Draw section dividers - top section is smaller
+    // Draw section dividers - top section is 1/6, middle is 35% smaller than half of remaining, bottom gets rest
     float topSectionHeight = getHeight() / 6.0f; // Top section is 1/6 of height
     float remainingHeight = getHeight() - topSectionHeight;
-    float middleSectionHeight = remainingHeight / 2.0f; // Middle and bottom split remaining space
+    float halfRemaining = remainingHeight / 2.0f;
+    float middleSectionHeight = halfRemaining * 0.65f; // Middle section is 35% smaller
+    float bottomSectionHeight = remainingHeight - middleSectionHeight; // Bottom gets the rest
     
     g.setColour(juce::Colour(0xff4a90e2).withAlpha(0.3f));
     g.drawLine(0.0f, topSectionHeight, (float)getWidth(), topSectionHeight, 1.0f);
@@ -225,11 +229,12 @@ void FuzzPedalAudioProcessorEditor::resized()
 {
     auto totalArea = getLocalBounds();
     
-    // Top section is smaller (1/6 of height), middle and bottom split remaining space
+    // Top section is 1/6 of height, middle is 35% smaller than half of remaining, bottom gets rest
     const int topSectionHeight = getHeight() / 6;
     const int remainingHeight = getHeight() - topSectionHeight;
-    const int middleSectionHeight = remainingHeight / 2;
-    const int bottomSectionHeight = remainingHeight - middleSectionHeight;
+    const int halfRemaining = remainingHeight / 2;
+    const int middleSectionHeight = (int)(halfRemaining * 0.65f); // Middle section is 35% smaller
+    const int bottomSectionHeight = remainingHeight - middleSectionHeight; // Bottom gets the rest
     
     // ===== TOP SECTION: Title and BPM Sync Button =====
     auto topSection = totalArea.removeFromTop(topSectionHeight);
