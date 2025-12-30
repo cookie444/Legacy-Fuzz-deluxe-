@@ -27,6 +27,14 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     fuzzCharacterSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
     addAndMakeVisible(&fuzzCharacterSlider);
     
+    // Volume slider
+    volumeSlider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
+    volumeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
+    volumeSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff27ae60));
+    volumeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff2c3e50));
+    volumeSlider.setColour(juce::Slider::thumbColourId, juce::Colour(0xffecf0f1));
+    addAndMakeVisible(&volumeSlider);
+    
     // Set up LFO controls
     lfoShapeCombo.addItem("Sine", 1);
     lfoShapeCombo.addItem("Triangle", 2);
@@ -134,6 +142,12 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
     fuzzCharacterLabel.setColour(juce::Label::textColourId, juce::Colour(0xffecf0f1));
     addAndMakeVisible(&fuzzCharacterLabel);
     
+    volumeLabel.setText("Volume", juce::dontSendNotification);
+    volumeLabel.setJustificationType(juce::Justification::centred);
+    volumeLabel.attachToComponent(&volumeSlider, false);
+    volumeLabel.setColour(juce::Label::textColourId, juce::Colour(0xffecf0f1));
+    addAndMakeVisible(&volumeLabel);
+    
     lfoShapeLabel.setText("Shape", juce::dontSendNotification);
     lfoShapeLabel.setJustificationType(juce::Justification::centred);
     lfoShapeLabel.attachToComponent(&lfoShapeCombo, false);
@@ -159,6 +173,8 @@ FuzzPedalAudioProcessorEditor::FuzzPedalAudioProcessorEditor (FuzzPedalAudioProc
         audioProcessor.getValueTreeState(), "compression", compressionSlider);
     fuzzCharacterAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         audioProcessor.getValueTreeState(), "fuzzCharacter", fuzzCharacterSlider);
+    volumeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        audioProcessor.getValueTreeState(), "volume", volumeSlider);
     
     // Note: AudioParameterChoice uses 0-based indices, combo uses 1-based IDs
     // The attachment handles this automatically, but we need to ensure the combo is set correctly
@@ -307,4 +323,8 @@ void FuzzPedalAudioProcessorEditor::resized()
     lfoCharacterEnableButton.setBounds(charX + (knobSize - lfoButtonSize) / 2, lfoButtonY, lfoButtonSize, 30);
     lfoCharacterAmountSlider.setBounds(charX + (knobSize - lfoKnobSize) / 2, lfoAmountY, lfoKnobSize, lfoKnobSize);
     fuzzCharacterSlider.setBounds(charX, mainKnobY, knobSize, knobSize);
+    
+    // Volume column (to the right of the three main knobs)
+    int volumeX = charX + knobSize + spacing;
+    volumeSlider.setBounds(volumeX, mainKnobY, knobSize, knobSize);
 }

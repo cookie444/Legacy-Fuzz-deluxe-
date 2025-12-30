@@ -33,6 +33,16 @@ FuzzPedalAudioProcessor::FuzzPedalAudioProcessor()
                 juce::String(), juce::AudioProcessorParameter::genericParameter,
                 [](float value, int) { return juce::String(value, 1) + " %"; }),
             
+            std::make_unique<juce::AudioParameterFloat>(
+                VOLUME_ID, "Volume",
+                juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 0.0f,
+                juce::String(), juce::AudioProcessorParameter::genericParameter,
+                [](float value, int) { 
+                    if (value > 0.0f)
+                        return "+" + juce::String(value, 1) + " dB";
+                    return juce::String(value, 1) + " dB";
+                }),
+            
             // LFO Parameters
             std::make_unique<juce::AudioParameterChoice>(
                 LFO_SHAPE_ID, "LFO Shape",
@@ -82,6 +92,7 @@ FuzzPedalAudioProcessor::FuzzPedalAudioProcessor()
     mixParam = parameters.getRawParameterValue(MIX_ID);
     compressionParam = parameters.getRawParameterValue(COMPRESSION_ID);
     fuzzCharacterParam = parameters.getRawParameterValue(FUZZ_CHARACTER_ID);
+    volumeParam = parameters.getRawParameterValue(VOLUME_ID);
     
     lfoShapeParam = parameters.getRawParameterValue(LFO_SHAPE_ID);
     lfoRateParam = parameters.getRawParameterValue(LFO_RATE_ID);
@@ -296,7 +307,12 @@ void FuzzPedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
             float fuzzed = processFuzz(input, fuzzCharacter, compression);
             
             // Mix dry and wet
-            channelData[sample] = input * (1.0f - mix) + fuzzed * mix;
+            float output = input * (1.0f - mix) + fuzzed * mix;
+            
+            // Apply volume boost/cut (convert dB to linear gain)
+            float volumeDb = volumeParam->load();
+            float volumeGain = juce::Decibels::decibelsToGain(volumeDb);
+            channelData[sample] = output * volumeGain;
         }
     }
 }

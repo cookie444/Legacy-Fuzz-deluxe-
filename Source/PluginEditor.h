@@ -23,6 +23,7 @@ private:
     juce::Slider mixSlider;
     juce::Slider compressionSlider;
     juce::Slider fuzzCharacterSlider;
+    juce::Slider volumeSlider;
     
     // LFO controls
     juce::ComboBox lfoShapeCombo;
@@ -42,6 +43,7 @@ private:
     juce::Label mixLabel;
     juce::Label compressionLabel;
     juce::Label fuzzCharacterLabel;
+    juce::Label volumeLabel;
     juce::Label lfoShapeLabel;
     juce::Label lfoRateLabel;
     juce::Label lfoSwingLabel;
@@ -50,6 +52,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> compressionAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> fuzzCharacterAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> volumeAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> lfoShapeAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lfoRateAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> lfoSyncAttachment;

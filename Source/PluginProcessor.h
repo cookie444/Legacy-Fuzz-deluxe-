@@ -56,6 +56,7 @@ private:
     static constexpr const char* MIX_ID = "mix";
     static constexpr const char* COMPRESSION_ID = "compression";
     static constexpr const char* FUZZ_CHARACTER_ID = "fuzzCharacter";
+    static constexpr const char* VOLUME_ID = "volume";
     
     // LFO Parameter IDs
     static constexpr const char* LFO_SHAPE_ID = "lfoShape";
@@ -75,6 +76,7 @@ private:
     std::atomic<float>* mixParam = nullptr;
     std::atomic<float>* compressionParam = nullptr;
     std::atomic<float>* fuzzCharacterParam = nullptr;
+    std::atomic<float>* volumeParam = nullptr;
     
     // LFO parameter pointers
     std::atomic<float>* lfoShapeParam = nullptr;
